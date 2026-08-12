@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simples Digital — Diagnóstico de outbound para e-commerce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F3F6F2;
+    --paper: #FFFFFF;
+    --ink: #0F231E;
+    --ink-soft: #4A625B;
+    --ink-faint: #8AA096;
+    --line: #D3DED7;
+    --redact: #0F231E;
+    --signal: #E85D2F;
+    --signal-soft: #FCE3D8;
+    --mint: #2F7A5E;
+    --mint-soft: #DCEFE4;
+    --radius: 2px;
+    --maxw: 1080px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
+  }
+
+  a{ color:inherit; }
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:26px 28px;
+    max-width:var(--maxw);
+    margin:0 auto;
+  }
+  .nav-mark{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:-0.01em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .nav-mark .dot{
+    width:8px; height:8px; background:var(--signal); border-radius:50%;
+    display:inline-block;
+  }
+  .nav-cta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    text-decoration:none;
+    border:1px solid var(--ink);
+    padding:9px 16px;
+    border-radius:var(--radius);
+    transition:background 0.15s ease, color 0.15s ease;
+  }
+  .nav-cta:hover{ background:var(--ink); color:var(--paper); }
+  .nav-cta:focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:56px 0 88px;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns: 1.15fr 0.95fr;
+    gap:56px;
+    align-items:start;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--ink-faint);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:clamp(2.1rem, 4.2vw, 3.35rem);
+    line-height:1.08;
+    letter-spacing:-0.015em;
+    color:var(--ink);
+    max-width:14ch;
+  }
+  h1 em{
+    font-style:normal;
+    color:var(--signal);
+  }
+  .hero-copy{
+    margin-top:22px;
+    font-size:17px;
+    color:var(--ink-soft);
+    max-width:46ch;
+  }
+  .hero-actions{
+    margin-top:34px;
+    display:flex;
+    align-items:center;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  .btn-primary{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    text-decoration:none;
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 24px;
+    border-radius:var(--radius);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    transition:transform 0.15s ease, background 0.15s ease;
+  }
+  .btn-primary:hover{ background:var(--signal); transform:translateY(-1px); }
+  .btn-primary:focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+  .btn-primary svg{ width:14px; height:14px; }
+  .hero-note{
+    font-size:13px;
+    color:var(--ink-faint);
+  }
+
+  /* ---------- CASE CARD (signature element) ---------- */
+  .case-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 26px 22px;
+    position:relative;
+    overflow:hidden;
+    box-shadow: 0 1px 0 rgba(15,35,30,0.03);
+  }
+  .case-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--signal), var(--mint) 130%);
+  }
+  .case-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:18px;
+  }
+  .redact-line{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .redact-bar{
+    display:inline-block;
+    height:11px;
+    background:var(--redact);
+    border-radius:1px;
+    animation: reveal-hold 4.5s ease-in-out infinite;
+  }
+  .redact-bar.w1{ width:118px; }
+  .redact-bar.w2{ width:64px; }
+  .redact-bar.w3{ width:92px; }
+  @keyframes reveal-hold{
+    0%, 78%{ opacity:1; }
+    86%, 94%{ opacity:0.18; }
+    100%{ opacity:1; }
+  }
+
+  .case-metrics{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .metric{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 14px 12px;
+  }
+  .metric-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    margin-bottom:6px;
+  }
+  .metric-value{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:26px;
+    letter-spacing:-0.01em;
+  }
+  .metric.signal .metric-value{ color:var(--signal); }
+  .metric.ok .metric-value{ color:var(--ink); }
+  .case-foot{
+    margin-top:18px;
+    font-size:13px;
+    color:var(--ink-soft);
+    border-top:1px dashed var(--line);
+    padding-top:14px;
+  }
+
+  /* ---------- PROBLEM ---------- */
+  .section{
+    padding:72px 0;
+    border-top:1px solid var(--line);
+  }
+  .section-head{
+    display:grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap:40px;
+    margin-bottom:44px;
+  }
+  .section-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:clamp(1.5rem, 2.6vw, 2rem);
+    letter-spacing:-0.01em;
+    line-height:1.2;
+  }
+  .section-body p{
+    color:var(--ink-soft);
+    font-size:16px;
+    max-width:56ch;
+  }
+  .section-body p + p{ margin-top:14px; }
+
+  /* ---------- SERVICE ---------- */
+  .service-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+  }
+  .service-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+    padding-bottom:22px;
+    margin-bottom:22px;
+  }
+  .service-name{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:22px;
+  }
+  .service-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    background:var(--mint-soft);
+    color:var(--mint);
+    padding:5px 10px;
+    border-radius:var(--radius);
+  }
+  .service-list{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:16px 32px;
+  }
+  .service-item{
+    display:flex;
+    gap:12px;
+    font-size:15px;
+    color:var(--ink-soft);
+  }
+  .service-item::before{
+    content:"—";
+    color:var(--signal);
+    font-family:'IBM Plex Mono', monospace;
+    flex-shrink:0;
+  }
+
+  /* ---------- STEPS ---------- */
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .step{
+    background:var(--paper);
+    padding:28px 24px;
+  }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--signal);
+    margin-bottom:14px;
+  }
+  .step h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:17px;
+    margin-bottom:8px;
+  }
+  .step p{
+    font-size:14.5px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- CTA ---------- */
+  .cta-section{
+    padding:80px 0 96px;
+    border-top:1px solid var(--line);
+  }
+  .cta-box{
+    background:var(--ink);
+    color:var(--bg);
+    border-radius:var(--radius);
+    padding:52px;
+    display:grid;
+    grid-template-columns:1.3fr 0.7fr;
+    gap:32px;
+    align-items:center;
+  }
+  .cta-box h2{ color:var(--paper); max-width:16ch; }
+  .cta-box .section-label{ color:#9DB3AB; }
+  .cta-box p{ color:#B9CBC3; margin-top:14px; max-width:42ch; font-size:15px; }
+  .cta-right{ display:flex; flex-direction:column; align-items:flex-start; gap:14px; min-width:0; }
+  .btn-light{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    text-decoration:none;
+    background:var(--signal);
+    color:var(--ink);
+    padding:15px 22px;
+    border-radius:var(--radius);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    font-weight:500;
+    white-space:nowrap;
+    transition:transform 0.15s ease;
+  }
+  .btn-light:hover{ transform:translateY(-1px); }
+  .btn-light:focus-visible{ outline:2px solid var(--paper); outline-offset:3px; }
+  .cta-mail{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:#9DB3AB;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:30px 0 46px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  footer .nav-mark{ font-size:14px; }
+  footer .foot-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+
+  /* ---------- REVEAL ---------- */
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .reveal{
+    animation:fadeUp 0.7s ease both;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ animation:none; }
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px){
+    .hero-grid{ grid-template-columns:1fr; gap:40px; }
+    .section-head{ grid-template-columns:1fr; gap:18px; }
+    .service-list{ grid-template-columns:1fr; }
+    .steps{ grid-template-columns:1fr; }
+    .cta-box{ grid-template-columns:1fr; padding:36px 26px; }
+    .cta-right{ align-items:flex-start; }
+    h1{ max-width:none; }
+  }
+  @media (max-width: 480px){
+    .nav{ padding:20px; }
+    .case-metrics{ grid-template-columns:1fr 1fr; }
+    .case-card{ padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-mark"><span class="dot"></span>simples digital</div>
+    <a class="nav-cta" href="#contato">Pedir diagnóstico</a>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Dados aplicados a e-commerce</p>
+        <h1>Seu funil tem um vazamento que o <em>open rate</em> não mostra.</h1>
+        <p class="hero-copy">A maioria das lojas Shopify abre bem o e-mail e não recebe resposta nenhuma. A gente mapeia onde a conversa morre no meio do caminho — e estrutura a prospecção pra ela voltar a gerar reunião, não só métrica de vaidade.</p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="#contato">
+            Pedir diagnóstico gratuito
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <span class="hero-note">Sem compromisso · resposta em até 2 dias úteis</span>
+        </div>
+      </div>
+
+      <div class="case-card reveal" id="caseCard">
+        <div class="case-head">
+          <span>Padrão diagnosticado em campo</span>
+          <span>Shopify · B2C</span>
+        </div>
+        <div class="redact-line">
+          <span>Loja:</span><span class="redact-bar w1"></span>
+        </div>
+        <div class="redact-line">
+          <span>Segmento:</span><span class="redact-bar w2"></span>
+        </div>
+        <div class="redact-line">
+          <span>Enriquecimento:</span><span class="redact-bar w3"></span>
+        </div>
+
+        <div class="case-metrics">
+          <div class="metric ok">
+            <div class="metric-label">Open rate</div>
+            <div class="metric-value">45%</div>
+          </div>
+          <div class="metric signal">
+            <div class="metric-label">Reply rate</div>
+            <div class="metric-value">~0%</div>
+          </div>
+        </div>
+
+        <p class="case-foot">O e-mail chegava e era aberto. A cadência não tinha motivo pra alguém responder. É o gargalo mais comum — e o mais barato de corrigir.</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="section reveal">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="section-label">O problema</p>
+        <div>
+          <h2>Open rate alto engana. É a métrica que mais mascara um funil quebrado.</h2>
+        </div>
+      </div>
+      <div class="section-body">
+        <p>Ferramenta de enriquecimento boa, lista limpa, assunto de e-mail que funciona — e ainda assim, silêncio. O problema quase nunca está no primeiro clique. Está na falta de contexto, no CTA genérico, na ausência de segmentação por sinal real de interesse.</p>
+        <p>A gente entra depois do envio, não antes: analisa a cadência inteira, identifica onde o destinatário para de prestar atenção, e reconstrói o funil com dado de verdade — não com mais um template de LinkedIn.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="section-label">O serviço</p>
+        <h2>Diagnóstico e estruturação de outbound data-driven</h2>
+      </div>
+
+      <div class="service-card">
+        <div class="service-top">
+          <span class="service-name">Diagnóstico de Prospecção</span>
+          <span class="service-tag">Entrega em 2–3 semanas</span>
+        </div>
+        <div class="service-list">
+          <div class="service-item">Auditoria completa da cadência atual (assunto, corpo, CTA, timing)</div>
+          <div class="service-item">Enriquecimento de base com dados reais de intenção de compra</div>
+          <div class="service-item">Segmentação por ICP, não por lista genérica</div>
+          <div class="service-item">Reescrita de cadência com foco em taxa de resposta, não abertura</div>
+          <div class="service-item">Dashboard simples de acompanhamento semanal</div>
+          <div class="service-item">Handoff documentado — você fica com o processo, não dependente de mim</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section reveal">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="section-label">Como funciona</p>
+        <h2>Três etapas, do diagnóstico ao ajuste contínuo</h2>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Diagnóstico</h3>
+          <p>Mapeamos sua cadência atual e apontamos exatamente onde a conversa está travando — com números, não achismo.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Estrutura</h3>
+          <p>Reconstruímos segmentação, enriquecimento de dados e mensagem, com foco em quem realmente responde.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Acompanhamento</h3>
+          <p>Métrica semanal de reply rate e ajuste contínuo — a cadência evolui com o que os dados mostram.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" id="contato">
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <p class="section-label">Vamos conversar</p>
+          <h2>Descubra onde sua prospecção está perdendo resposta</h2>
+          <p>Diagnóstico inicial sem custo — 20 minutos pra entender seu funil atual e mostrar onde está o vazamento.</p>
+        </div>
+        <div class="cta-right">
+          <a class="btn-light" href="mailto:contato@simplesdigital.pro?subject=Diagn%C3%B3stico%20de%20Prospec%C3%A7%C3%A3o">
+            Falar com Simples Digital
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <span class="cta-mail">contato@simplesdigital.pro</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; width:100%;">
+      <div class="nav-mark"><span class="dot"></span>simples digital</div>
+      <span class="foot-note">simplesdigital.pro · São Paulo, Brasil</span>
+    </div>
+  </footer>
+
+</body>
+</html>
